@@ -1,0 +1,4 @@
+{% extends 'base.html' %}{% block title %}VoteSpace · Polls{% endblock %}{% block content %}
+<section class="hero"><p class="eyebrow">COMMUNITY POLLS</p><h1>Your voice shapes<br>what happens next.</h1><p>Choose a poll, cast your vote, and see how the community feels.</p></section>
+<section class="poll-grid">{% for question in questions %}<article class="poll-card"><span class="status">Open for voting</span><h2>{{ question.question }}</h2><div class="card-actions"><a class="button" href="{{ url_for('poll', question_id=question.id) }}">Cast your vote</a><a href="{{ url_for('results', question_id=question.id) }}">View results →</a></div></article>{% else %}<p>No polls are open right now. Please check back soon.</p>{% endfor %}</section>
+{% endblock %}
