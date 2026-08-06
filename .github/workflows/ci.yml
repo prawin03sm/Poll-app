@@ -1,0 +1,38 @@
+name: Flask CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test application
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt
+
+      - name: Check Python syntax
+        run: python -m compileall -q app.py
+
+      - name: Verify Flask application
+        run: |
+          python -c "from app import app; assert app.config['DATABASE']; print('Flask app loaded successfully')"
+
+      # Add deployment steps here once a hosting provider is selected.
