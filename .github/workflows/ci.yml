@@ -54,12 +54,10 @@ jobs:
         with:
           python-version: "3.12"
 
-      - run: |
-          pip install -r requirements.txt
+      - run: pip install -r requirements.txt
 
       - name: Run Tests
-        run: |
-          pytest
+        run: pytest
 
   deploy:
     
