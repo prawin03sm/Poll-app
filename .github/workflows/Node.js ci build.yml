@@ -12,15 +12,26 @@ jobs:
     steps:
       - name: checkout source code
         uses: actions/checkout@v4
+        
       - name: setup python
         uses: actions/setup-python@v4
         with:
           python-version: '3.8'
+          
       - name: install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      - name: run build
-        run: python app.py build
+          
       - name: run tests
         run: python -m pytest
+        
+      - name: Create deployment package
+        run: |
+          zip -r poll-app.zip . -x ".git/*" ".github/*"
+          
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: poll-app
+          path: poll-app.zip
