@@ -10,29 +10,107 @@ permissions:
   contents: read
 
 jobs:
-  test:
-    name: Test application
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out source
+      - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: pip
-          cache-dependency-path: requirements.txt
 
-      - name: Install dependencies
-        run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt
-
-      - name: Check Python syntax
-        run: python -m compileall -q app.py
-
-      - name: Verify Flask application
+      - name: Install Dependencies
         run: |
-          python -c "from app import app; assert app.config['DATABASE']; print('Flask app loaded successfully')"
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-      # Add deployment steps here once a hosting provider is selected.
+      - name: Create Deployment Package
+        run: |
+          zip -r poll-app.zip . \
+          -x ".git/*" \
+          -x ".github/*"
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: poll-app
+          path: poll-app.zip
+  
+  test:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: poll-app
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: |
+          pip install -r requirements.txt
+
+      - name: Run Tests
+        run: |
+          pytest
+
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: poll-app
+
+      - name: Copy package to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DEV_HOST }}
+          username: ubuntu
+          key: ${{ secrets.SSH_KEY }}
+          source: poll-app.zip
+          target: /home/ubuntu
+
+      - name: Deploy application
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEV_HOST }}
+          username: ubuntu
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /home/ubuntu
+            unzip -o poll-app.zip
+            sudo systemctl restart pollapp
+  production:
+
+    environment:
+      name: production
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: poll-app
+
+      - name: Deploy to Production
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ubuntu
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /home/ubuntu
+            unzip -o poll-app.zip
+            sudo systemctl restart pollapp
