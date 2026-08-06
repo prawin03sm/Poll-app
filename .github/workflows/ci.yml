@@ -40,8 +40,7 @@ jobs:
           path: poll-app.zip
   
   test:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
-
+    
     runs-on: ubuntu-latest
 
     steps:
@@ -63,8 +62,7 @@ jobs:
           pytest
 
   deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
-
+    
     runs-on: ubuntu-latest
 
     steps:
