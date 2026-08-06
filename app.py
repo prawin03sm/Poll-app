@@ -175,7 +175,7 @@ def create_question():
             cursor = db.execute("INSERT INTO questions (question) VALUES (?)", (question,))
             db.executemany("INSERT INTO choices (question_id, choice_text) VALUES (?, ?)", [(cursor.lastrowid, item) for item in choices])
             db.commit()
-            flash("Poll created successfully.", "success")
+            flash("Poll created", "success")
             return redirect(url_for("admin_dashboard"))
     return render_template("question_form.html", question=None, choices=["", ""])
 
