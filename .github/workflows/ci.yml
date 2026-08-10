@@ -3,13 +3,11 @@ name: Python CI - Build and Test
 on:
   push:
     branches:
-      - main
-      - dev
+      - master
 
   pull_request:
     branches:
-      - main
-      - dev
+      - master
 
 jobs:
   build-and-test:
