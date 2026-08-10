@@ -28,11 +28,9 @@ jobs:
       - name: Install dependencies
         run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt
 
-      - name: Check Python syntax
+      - name: Build application
         run: python -m compileall -q app.py
 
-      - name: Verify Flask application
+      - name: Test application
         run: |
-          python -c "from app import app; assert app.config['DATABASE']; print('Flask app loaded successfully')"
-
-      # Add deployment steps here once a hosting provider is selected.
+          pytest -q
