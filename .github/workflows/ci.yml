@@ -46,10 +46,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/download-artifact@v4
-        with:
-          name: poll-app
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -58,55 +54,3 @@ jobs:
 
       - name: Run Tests
         run: pytest
-
-  deploy:
-    
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: poll-app
-
-      - name: Copy package to EC2
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.DEV_HOST }}
-          username: ubuntu
-          key: ${{ secrets.SSH_KEY }}
-          source: poll-app.zip
-          target: /home/ubuntu
-
-      - name: Deploy application
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.DEV_HOST }}
-          username: ubuntu
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            cd /home/ubuntu
-            unzip -o poll-app.zip
-            sudo systemctl restart pollapp
-  production:
-
-    environment:
-      name: production
-
-    runs-on: ubuntu-latest
-
-    steps:
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: poll-app
-
-      - name: Deploy to Production
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.PROD_HOST }}
-          username: ubuntu
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            cd /home/ubuntu
-            unzip -o poll-app.zip
-            sudo systemctl restart pollapp
