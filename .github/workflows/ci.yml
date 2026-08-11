@@ -45,6 +45,7 @@ jobs:
             app.py
             templates/
             static/
+            test_app.py
             requirements.txt
 
 
